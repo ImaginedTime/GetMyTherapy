@@ -29,24 +29,46 @@ export default function LoginScreen({ setScreen }) {
 
     const [loading, setLoading] = useState(false);
 
+    const addEvent = async (username, email) => {
+        try {
+            const response = await axios.post("/event/add", { username, email });
+
+            console.log(response.data);
+
+            if (response.status === 200) {
+                ToastAndroid.show(response.data.message || 'Event added successfully', ToastAndroid.SHORT);
+            } else {
+                ToastAndroid.show(response.data.message || 'Error adding event', ToastAndroid.SHORT);
+            }
+        }
+        catch (err) {
+            console.log(err);
+            ToastAndroid.show(err.response.data.error || 'Some Error occurred', ToastAndroid.SHORT);
+        }
+    }
+
     const login = async () => {
-        if(email === '' || password === '') {
+        if (email === '' || password === '') {
             ToastAndroid.show('Please fill all fields', ToastAndroid.SHORT);
             return;
         }
         try {
             setLoading(true);
             const response = await axios.post("/user/login", { email, password });
-            if(response.status === 200) {
+            if (response.status === 200) {
                 ToastAndroid.show('Login Successful', ToastAndroid.SHORT);
-                setItem('token', response.data.token);
-                setItem('email', response.data.email);
+                await setItem('token', response.data.token);
+                await setItem('email', response.data.email);
+                await setItem("username", response.data.username);
+
+                await addEvent(response.data.username, response.data.email);
+
                 setScreen('success');
             } else {
                 ToastAndroid.show('Login Failed', ToastAndroid.SHORT);
             }
         }
-        catch(err) {
+        catch (err) {
             console.log(err.response.data.error);
             ToastAndroid.show(err.response.data.error || 'Some Error occurred', ToastAndroid.SHORT);
         }
@@ -97,8 +119,8 @@ export default function LoginScreen({ setScreen }) {
                 </SPressable>
 
                 <SPressable className='mt-6 items-center justify-center bg-[#FE8C00] p-4 rounded-full flex-row' onPress={login}>
-                    { !loading && <SText className='font-[500] text-white text-lg'>Sign In</SText> }
-                    { loading && <ActivityIndicator size={20} color="#fff" /> }
+                    {!loading && <SText className='font-[500] text-white text-lg'>Sign In</SText>}
+                    {loading && <ActivityIndicator size={20} color="#fff" />}
                 </SPressable>
 
                 <SView className='flex-row items-center gap-2 mt-6'>

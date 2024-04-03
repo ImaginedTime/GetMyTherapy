@@ -36,6 +36,24 @@ export default function SignUpScreen({ setScreen }) {
 
     const [loading, setLoading] = useState(false);
 
+    const addEvent = async (username, email) => {
+        try {
+            const response = await axios.post("/event/add", { username, email });
+
+            console.log(response.data);
+
+            if (response.status === 200) {
+                ToastAndroid.show(response.data.message || 'Event added successfully', ToastAndroid.SHORT);
+            } else {
+                ToastAndroid.show(response.data.message || 'Error adding event', ToastAndroid.SHORT);
+            }
+        }
+        catch (err) {
+            console.log(err);
+            ToastAndroid.show(err.response.data.error || 'Some Error occurred', ToastAndroid.SHORT);
+        }
+    }
+
     const signup = async () => {
         if (email === '' || username === '' || password === '') {
             ToastAndroid.show('Please fill all fields', ToastAndroid.SHORT);
@@ -52,8 +70,13 @@ export default function SignUpScreen({ setScreen }) {
             const response = await axios.post("/user/signup", { username, email, password });
             if (response.status === 200) {
                 ToastAndroid.show('Signup Successful', ToastAndroid.SHORT);
-                setItem('token', response.data.token);
-                setItem('email', response.data.email);
+                
+                await setItem('token', response.data.token);
+                await setItem('email', response.data.email);
+                await setItem("username", response.data.username);
+
+                await addEvent(response.data.username, response.data.email);
+
                 setScreen('success');
             } else {
                 ToastAndroid.show('Signup Failed', ToastAndroid.SHORT);
