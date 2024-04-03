@@ -13,7 +13,9 @@ import AuthPage from './components/AuthPage';
 
 import axios from 'axios';
 
-axios.defaults.baseURL = 'https://getmytherapy.onrender.com/api';
+const baseURL = 'https://getmytherapy.onrender.com/api';
+
+axios.defaults.baseURL = baseURL;
 
 const Stack = createNativeStackNavigator();
 
