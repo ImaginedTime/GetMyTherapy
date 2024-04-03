@@ -2,11 +2,12 @@ import { useNavigation } from '@react-navigation/native';
 import axios from 'axios';
 import { styled } from 'nativewind';
 import { useState } from 'react';
-import { View, Text, Button, ImageBackground, Pressable, TextInput, Image, ToastAndroid } from 'react-native';
+import { View, Text, Button, ImageBackground, Pressable, TextInput, Image, ToastAndroid, ActivityIndicator } from 'react-native';
 
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import Icon from 'react-native-vector-icons/FontAwesome';
+import { getItem, setItem } from '../utils/asyncStorage.js';
 
 
 const SView = styled(View);
@@ -26,28 +27,31 @@ export default function LoginScreen({ setScreen }) {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
 
+    const [loading, setLoading] = useState(false);
+
     const login = async () => {
         if(email === '' || password === '') {
             ToastAndroid.show('Please fill all fields', ToastAndroid.SHORT);
             return;
         }
         try {
-            // const response = await axios.post('http://localhost:8000/api/user/login', { email, password }, {
-            //     headers: {
-            //         'Content-Type': 'application/json'
-            //     }
-            // });
-            const response = await axios.get("https://some-random-api.ml/animal/bird");
-            console.log(response.data);
-            // if(response.data.status === 'success') {
-            //     ToastAndroid.show('Login Successful', ToastAndroid.SHORT);
-            // } else {
-            //     ToastAndroid.show('Login Failed', ToastAndroid.SHORT);
-            // }
+            setLoading(true);
+            const response = await axios.post("/user/login", { email, password });
+            if(response.status === 200) {
+                ToastAndroid.show('Login Successful', ToastAndroid.SHORT);
+                setItem('token', response.data.token);
+                setItem('email', response.data.email);
+                setScreen('success');
+            } else {
+                ToastAndroid.show('Login Failed', ToastAndroid.SHORT);
+            }
         }
         catch(err) {
-            console.log(err);
-            ToastAndroid.show('Some Error occurred', ToastAndroid.SHORT);
+            console.log(err.response.data.error);
+            ToastAndroid.show(err.response.data.error || 'Some Error occurred', ToastAndroid.SHORT);
+        }
+        finally {
+            setLoading(false);
         }
     }
 
@@ -92,8 +96,9 @@ export default function LoginScreen({ setScreen }) {
                     <SText className='font-[500] text-[#FE8C00]'>Forgot Password?</SText>
                 </SPressable>
 
-                <SPressable className='mt-6 items-center justify-center bg-[#FE8C00] p-4 rounded-full' onPress={login}>
-                    <SText className='font-[500] text-white text-lg'>Sign In</SText>
+                <SPressable className='mt-6 items-center justify-center bg-[#FE8C00] p-4 rounded-full flex-row' onPress={login}>
+                    { !loading && <SText className='font-[500] text-white text-lg'>Sign In</SText> }
+                    { loading && <ActivityIndicator size={20} color="#fff" /> }
                 </SPressable>
 
                 <SView className='flex-row items-center gap-2 mt-6'>

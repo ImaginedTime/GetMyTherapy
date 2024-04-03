@@ -1,12 +1,14 @@
 import { useNavigation } from '@react-navigation/native';
+import axios from 'axios';
 import { styled } from 'nativewind';
 import { useState } from 'react';
-import { View, Text, Button, ImageBackground, Pressable, TextInput, Image, ToastAndroid } from 'react-native';
+import { View, Text, Button, ImageBackground, Pressable, TextInput, Image, ToastAndroid, ActivityIndicator } from 'react-native';
 import BouncyCheckbox from 'react-native-bouncy-checkbox';
 
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import Icon from 'react-native-vector-icons/FontAwesome';
+import { getItem, setItem } from '../utils/asyncStorage.js';
 
 
 const SView = styled(View);
@@ -32,7 +34,9 @@ export default function SignUpScreen({ setScreen }) {
     const [password, setPassword] = useState('');
     const [isChecked, setIsChecked] = useState(false);
 
-    const signup = () => {
+    const [loading, setLoading] = useState(false);
+
+    const signup = async () => {
         if (email === '' || username === '' || password === '') {
             ToastAndroid.show('Please fill all fields', ToastAndroid.SHORT);
             return;
@@ -43,8 +47,26 @@ export default function SignUpScreen({ setScreen }) {
             return;
         }
 
-        // navigate('Home');
-        setScreen('success');
+        try {
+            setLoading(true);
+            const response = await axios.post("/user/signup", { username, email, password });
+            if (response.status === 200) {
+                ToastAndroid.show('Signup Successful', ToastAndroid.SHORT);
+                setItem('token', response.data.token);
+                setItem('email', response.data.email);
+                setScreen('success');
+            } else {
+                ToastAndroid.show('Signup Failed', ToastAndroid.SHORT);
+            }
+        }
+        catch (err) {
+            // console.log(err.response.data.error);
+            console.log(err);
+            ToastAndroid.show(err?.response?.data?.error || 'Some Error occurred', ToastAndroid.SHORT);
+        }
+        finally {
+            setLoading(false);
+        }
     }
 
     return (
@@ -111,8 +133,9 @@ export default function SignUpScreen({ setScreen }) {
                     </SView>
                 </SView>
 
-                <SPressable className='mt-6 items-center justify-center bg-[#FE8C00] p-4 rounded-full' onPress={signup}>
-                    <SText className='font-[500] text-white text-lg'>Register</SText>
+                <SPressable className='mt-6 items-center justify-center bg-[#FE8C00] p-4 rounded-full flex-row' onPress={signup}>
+                    {!loading && <SText className='font-[500] text-white text-lg'>Register</SText>}
+                    {loading && <ActivityIndicator size={20} color="#fff" />}
                 </SPressable>
 
                 <SView className='flex-row items-center gap-2 mt-6'>

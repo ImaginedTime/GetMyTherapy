@@ -1,7 +1,7 @@
 import { styled } from 'nativewind';
 import { View, Text, Button, ImageBackground, Pressable, Image } from 'react-native';
 
-import bgImg from '../assets/bg3.png';
+import bgImg from '../../assets/bg3.png';
 
 import { SafeAreaView } from 'react-native-safe-area-context';
 
@@ -36,7 +36,7 @@ export default function IntroductionPage3({ navigation }) {
                         >
                             <SView className='w-[94px] h-[94px] rotate-45 flex justify-center items-center p-4 border-2 border-white border-l-[#c2c2c2] rounded-[47px]'>
                                 <SView className='bg-white w-full h-full rounded-full flex justify-center items-center'>
-                                    <Image source={require('../assets/arrow-up-right.png')} style={{width: 24, height: 24}}/>
+                                    <Image source={require('../../assets/arrow-up-right.png')} style={{width: 24, height: 24}}/>
                                 </SView>
                             </SView>
                         </SPressable>

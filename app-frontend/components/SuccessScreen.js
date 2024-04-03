@@ -10,6 +10,8 @@ import Icon from 'react-native-vector-icons/FontAwesome';
 
 import bgImg from '../assets/bg1.png';
 
+import { clearAll } from '../utils/asyncStorage.js';
+
 
 const SView = styled(View);
 const SText = styled(Text);
@@ -33,6 +35,8 @@ export default function SuccessScreen({ setScreen }) {
     }, []);
 
     const handleNext = () => {
+        bottomSheetModalRef.current?.dismiss();
+        clearAll();
         setScreen("login");
     }
 

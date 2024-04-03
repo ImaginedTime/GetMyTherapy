@@ -1,13 +1,17 @@
 import { useNavigation } from '@react-navigation/native';
 import { styled } from 'nativewind';
 import { useEffect, useRef, useState } from 'react';
-import { View, Text, Button, ImageBackground, Pressable, TextInput, Image, ToastAndroid, KeyboardAvoidingView, Platform } from 'react-native';
+import { View, Text, Button, ImageBackground, Pressable, TextInput, Image, ToastAndroid, KeyboardAvoidingView, Platform, ActivityIndicator } from 'react-native';
 import BouncyCheckbox from 'react-native-bouncy-checkbox';
 
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-import Icon from 'react-native-vector-icons/FontAwesome';
 import OTPInput from './OTPInput';
+
+import axios from 'axios';
+
+import Icon from 'react-native-vector-icons/FontAwesome';
+import { getItem, setItem } from '../../utils/asyncStorage.js';
 
 
 const SView = styled(View);
@@ -39,6 +43,8 @@ export default function ForgotPasswordVerification({ setScreen, setForgotPage, e
     const [isPinReady, setIsPinReady] = useState(false);
     const maximumCodeLength = 4;
 
+    const [loading, setLoading] = useState(false);
+
     const [optExpirationTime, setOptExpirationTime] = useState(600000);
 
     const convertToTime = (ms) => {
@@ -50,7 +56,7 @@ export default function ForgotPasswordVerification({ setScreen, setForgotPage, e
         return `${formattedMinutes}:${formattedSeconds}`;
     }
 
-    const handleNext = () => {
+    const handleNext = async () => {
         if (!isPinReady) {
             ToastAndroid.show('Please fill the OTP field', ToastAndroid.SHORT);
             return;
@@ -68,12 +74,32 @@ export default function ForgotPasswordVerification({ setScreen, setForgotPage, e
             return;
         }
 
-        setIsPinReady(true);
-        setForgotPage("reset");
+        try {
+            setLoading(true);
+            const response = await axios.post("/user/verify-otp", { email, otp: otpCode }, {
+                headers: {
+                    Authorization: `Bearer ${await getItem('token')}`
+                }
+            });
+            if (response.status === 200) {
+                ToastAndroid.show('OTP Verified Successfully', ToastAndroid.SHORT);
+                setItem('token', response.data.token);
+                setForgotPage("reset");
+            } else {
+                ToastAndroid.show('Failed to verify OTP', ToastAndroid.SHORT);
+            }
+        }
+        catch (err) {
+            console.log(err);
+            ToastAndroid.show(err.response.data.error || 'Some Error occurred', ToastAndroid.SHORT);
+        }
+        finally {
+            setLoading(false);
+        }
     }
 
     useInterval(() => {
-        if (optExpirationTime <= 0) 
+        if (optExpirationTime <= 0)
             return;
         setOptExpirationTime(optExpirationTime - 500);
     }, 500);
@@ -81,8 +107,8 @@ export default function ForgotPasswordVerification({ setScreen, setForgotPage, e
     return (
         <KeyboardAvoidingView
             behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
-            <SView className='flex justify-center p-2'>
-                <SPressable onPress={() => setForgotPage("email")} className='absolute border-2 border-[#EDEDED] px-[10px] py-2 rounded-full'>
+            <SView className='flex justify-center p-2 bg-green-500'>
+                <SPressable onPress={() => setForgotPage("email")} className='absolute border-2 border-[#EDEDED] px-[10px] py-2 rounded-full z-10'>
                     <SIcon name='chevron-left' size={14} color='#101010' />
                 </SPressable>
                 <SText className='text-center font-[600] text-[18px]'>OTP</SText>
@@ -115,7 +141,8 @@ export default function ForgotPasswordVerification({ setScreen, setForgotPage, e
 
 
             <SPressable className='mt-8 items-center justify-center bg-[#FE8C00] p-4 rounded-full' onPress={handleNext}>
-                <SText className='font-[500] text-white text-lg'>Continue</SText>
+                { !loading && <SText className='font-[500] text-white text-lg'>Continue</SText> }
+                { loading && <ActivityIndicator size={20} color="#fff" /> }
             </SPressable>
 
         </KeyboardAvoidingView>
