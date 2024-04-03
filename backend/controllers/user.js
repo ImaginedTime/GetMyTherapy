@@ -74,7 +74,7 @@ export const forgotPassword = async (req, res) => {
         const salt = await bcrypt.genSalt(10);
         const hashedOtp = await bcrypt.hash(otp.toString(), salt);
 
-        const token = createToken({ _id: user._id, otp: hashedOtp }, time='10m');
+        const token = createToken({ _id: user._id, otp: hashedOtp }, '10m');
 
         res.status(200).json({ email, token });
     }
@@ -105,7 +105,7 @@ export const verifyOtp = async (req, res) => {
                 throw new Error("Invalid OTP");
             }
 
-            const token = createToken({ _id: user._id }, time='10m');
+            const token = createToken({ _id: user._id }, '10m');
 
             res.status(200).json({ message: "OTP verified", token });
         } else {
