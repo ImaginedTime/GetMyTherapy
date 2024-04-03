@@ -3,6 +3,8 @@ import mongoose from "mongoose";
 import userRoutes from "./routes/user.js";
 import cors from "cors";
 import dotenv from "dotenv";
+import { addEvent } from "./controllers/event.js";
+
 dotenv.config();
 
 const app = express();
@@ -17,6 +19,8 @@ app.get("/", (req, res) => {
 
 // routes
 app.use("/api/user", userRoutes);
+
+app.post("/api/event/add", addEvent);
 
 // connect to db
 mongoose.connect(process.env.MONGO_URI)
