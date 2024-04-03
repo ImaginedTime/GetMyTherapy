@@ -25,7 +25,7 @@ export const loginUser = async (req, res) => {
         // create a token
         const token = createToken({ _id: user._id });
 
-        res.status(200).json({ message: "Login Successful", email, token });
+        res.status(200).json({ message: "Login Successful", email, username: user.username, token });
     } catch (err) {
         res.status(400).json({ error: err.message });
     }
@@ -41,7 +41,7 @@ export const signupUser = async (req, res) => {
         // create a token
         const token = createToken({ _id: user._id });
 
-        res.status(200).json({ message: "Signup Successful", email, token });
+        res.status(200).json({ message: "Signup Successful", email, username, token });
     } catch (err) {
         res.status(400).json({ error: err.message });
     }
