@@ -63,6 +63,7 @@ export default function ForgotPasswordVerification({ setScreen, setForgotPage, e
         }
         if (optExpirationTime <= 0) {
             ToastAndroid.show('OTP has expired', ToastAndroid.SHORT);
+            setForgotPage("email");
             return;
         }
         if (otpCode === '') {

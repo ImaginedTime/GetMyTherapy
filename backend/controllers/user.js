@@ -4,9 +4,9 @@ import { sendingMail } from "../utils/mailer.js";
 import bcrypt from "bcryptjs";
 
 
-const createToken = (body) => {
+const createToken = (body, time='3d') => {
     return jwt.sign(body, process.env.JWT_SECRET_KEY, {
-        expiresIn: "3d",
+        expiresIn: time,
     });
 };
 
@@ -74,7 +74,7 @@ export const forgotPassword = async (req, res) => {
         const salt = await bcrypt.genSalt(10);
         const hashedOtp = await bcrypt.hash(otp.toString(), salt);
 
-        const token = createToken({ _id: user._id, otp: hashedOtp });
+        const token = createToken({ _id: user._id, otp: hashedOtp }, time='10m');
 
         res.status(200).json({ email, token });
     }
@@ -105,7 +105,7 @@ export const verifyOtp = async (req, res) => {
                 throw new Error("Invalid OTP");
             }
 
-            const token = createToken({ _id: user._id });
+            const token = createToken({ _id: user._id }, time='10m');
 
             res.status(200).json({ message: "OTP verified", token });
         } else {
