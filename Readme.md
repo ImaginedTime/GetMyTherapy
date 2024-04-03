@@ -6,7 +6,7 @@ This repository contains the code for the GetMyTherapy Assignment. The repositor
 
 - [Cloning the Repository](#clone-the-repository)
 - [Backend](backend/Readme.md)
-- [Frontend](frontend/Readme.md)
+- [Frontend](app-frontend/Readme.md)
 
 ## Clone the repository:
 
